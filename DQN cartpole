@@ -1,4 +1,3 @@
-
 import os
 import random
 import gym
@@ -25,9 +24,9 @@ def OurModel(input_shape, action_space,layer_num):
     X_input = Input(input_shape)
     X = X_input
     if layer_num == 3:
-        X = Dense(128, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(22, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(12, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(40, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(60, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(30, activation="relu", kernel_initializer='he_uniform')(X)
     if layer_num == 5:
         X = Dense(32, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
@@ -37,7 +36,7 @@ def OurModel(input_shape, action_space,layer_num):
     # Output Layer with # of actions: 2 nodes (left, right)
     X = Dense(action_space, activation="softmax", kernel_initializer='he_uniform')(X)
     model = Model(inputs=X_input, outputs=X)
-    model.compile(loss="mse", optimizer=RMSprop(lr=0.001, rho=0.95, epsilon=0.05),
+    model.compile(loss="mse", optimizer=RMSprop(lr=0.002, rho=0.95, epsilon=0.05),
                   metrics=["accuracy"])
     return model
 
@@ -55,11 +54,11 @@ class DQNAgent:
         self.EPISODES = 10000
         self.memory = deque(maxlen=2000)
 
-        self.gamma = 0.98  # discount rate
+        self.gamma = 0.87  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.999
-        self.batch_size = 256
+        self.batch_size = 64
         self.train_start = 1000
         self.layer_num=3
         self.Save_Path = 'Models'
@@ -120,7 +119,7 @@ class DQNAgent:
                 target[i][action[i]] = reward[i] + self.gamma * (np.amax(target_next[i]))
 
         # Train the Neural Network with batches
-        history=self.model.fit(state, target, batch_size=self.batch_size, verbose=0,epochs=50)
+        history=self.model.fit(state, target, batch_size=self.batch_size, verbose=0 )
         loss = history.history['loss'][0]
         with train_summary_writer.as_default():
             tf.summary.scalar('loss', loss, step=i)
