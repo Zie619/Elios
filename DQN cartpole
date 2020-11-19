@@ -1,3 +1,6 @@
+# Tutorial by www.pylessons.com
+# Tutorial written for - Tensorflow 2.3.1
+
 import os
 import random
 import gym
@@ -24,14 +27,14 @@ def OurModel(input_shape, action_space,layer_num):
     X_input = Input(input_shape)
     X = X_input
     if layer_num == 3:
-        X = Dense(512, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(256, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(64, activation="relu", kernel_initializer='he_uniform')(X)
-    if layer_num == 5:
-        X = Dense(512, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(256, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(64, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(32, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(32, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(32, activation="relu", kernel_initializer='he_uniform')(X)
+    if layer_num == 5:
+        X = Dense(16, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(24, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
     # Output Layer with # of actions: 2 nodes (left, right)
     X = Dense(action_space, activation="softmax", kernel_initializer='he_uniform')(X)
@@ -58,7 +61,7 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.999
-        self.batch_size = 256
+        self.batch_size = 512
         self.train_start = 1000
         self.layer_num=3
         self.Save_Path = 'Models'
