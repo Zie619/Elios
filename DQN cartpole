@@ -15,7 +15,7 @@ config = tf.compat.v1.ConfigProto(gpu_options =
 config.gpu_options.allow_growth = True
 session = tf.compat.v1.Session(config=config)
 tf.compat.v1.keras.backend.set_session(session)
-log_dir = "logs/last/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = "logs/last/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+'test128128100-128'
 train_summary_writer = tf.summary.create_file_writer(log_dir)
 
 ################
@@ -24,9 +24,9 @@ def OurModel(input_shape, action_space,layer_num):
     X_input = Input(input_shape)
     X = X_input
     if layer_num == 3:
-        X = Dense(512, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(256, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(64, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(32, input_shape=input_shape, activation="tanh", kernel_initializer='he_uniform')(X)
+        X = Dense(24, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
     if layer_num == 5:
         X = Dense(32, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
@@ -34,9 +34,9 @@ def OurModel(input_shape, action_space,layer_num):
         X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(4, activation="relu", kernel_initializer='he_uniform')(X)
     # Output Layer with # of actions: 2 nodes (left, right)
-    X = Dense(action_space, activation="softmax", kernel_initializer='he_uniform')(X)
+    X = Dense(action_space, activation="linear", kernel_initializer='he_uniform')(X)
     model = Model(inputs=X_input, outputs=X)
-    model.compile(loss="mse", optimizer=RMSprop(lr=0.00025, rho=0.95, epsilon=0.01),
+    model.compile(loss="mse", optimizer=Adam(lr=0.00021, epsilon=0.01),
                   metrics=["accuracy"])
     return model
 
@@ -45,20 +45,19 @@ class DQNAgent:
     def __init__(self, env_name):
         self.env_name = env_name
         self.env = gym.make(env_name)
-        self.env.seed(0)
         # by default, CartPole-v1 has max episode steps = 500
-        self.env._max_episode_steps = 4000
+        self.env._max_episode_steps = 500
         self.state_size = self.env.observation_space.shape[0]
         self.action_size = self.env.action_space.n
 
         self.EPISODES = 10000
         self.memory = deque(maxlen=2000)
 
-        self.gamma = 0.95  # discount rate
+        self.gamma = 0.97  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.999
-        self.batch_size = 32
+        self.epsilon_decay = 0.9995
+        self.batch_size = 256
         self.train_start = 1000
         self.layer_num=3
         self.Save_Path = 'Models'
@@ -166,10 +165,6 @@ class DQNAgent:
 
                     print("episode: {}/{}, score: {}, e: {:.2}, average: {}".format(e, self.EPISODES, i, self.epsilon,
                                                                                     average))
-                    if i == self.env._max_episode_steps:
-                        print("Saving trained model as cartpole-ddqn.h5")
-                        # self.save("cartpole-ddqn.h5")
-                        break
                 self.replay()
                 with train_summary_writer.as_default():
                     tf.summary.scalar('reward', i, step=e)
@@ -182,7 +177,7 @@ class DQNAgent:
             done = False
             i = 0
             while not done:
-                self.env.render()
+                #self.env.render()
                 action = np.argmax(self.model.predict(state))
                 next_state, reward, done, _ = self.env.step(action)
                 state = np.reshape(next_state, [1, self.state_size])
@@ -196,4 +191,4 @@ if __name__ == "__main__":
     env_name = 'CartPole-v1'
     agent = DQNAgent(env_name)
     agent.run()
-    # agent.test()
+    #agent.test()
