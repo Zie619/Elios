@@ -28,11 +28,11 @@ def OurModel(input_shape, action_space,layer_num):
         X = Dense(24, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
     if layer_num == 5:
-        X = Dense(32, input_shape=input_shape, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(8, input_shape=input_shape, activation="tanh", kernel_initializer='he_uniform')(X)
+        X = Dense(10, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(12, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(4, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(6, activation="relu", kernel_initializer='he_uniform')(X)
     # Output Layer with # of actions: 2 nodes (left, right)
     X = Dense(action_space, activation="linear", kernel_initializer='he_uniform')(X)
     model = Model(inputs=X_input, outputs=X)
@@ -59,7 +59,7 @@ class DQNAgent:
         self.epsilon_decay = 0.9995
         self.batch_size = 256
         self.train_start = 1000
-        self.layer_num=3
+        self.layer_num = 5
         self.Save_Path = 'Models'
         self.scores, self.episodes, self.average = [], [], []
 
@@ -165,9 +165,10 @@ class DQNAgent:
 
                     print("episode: {}/{}, score: {}, e: {:.2}, average: {}".format(e, self.EPISODES, i, self.epsilon,
                                                                                     average))
+                    with train_summary_writer.as_default():
+                        tf.summary.scalar('reward', i, step=e)
                 self.replay()
-                with train_summary_writer.as_default():
-                    tf.summary.scalar('reward', i, step=e)
+
 
     def test(self):
         self.load("cartpole-ddqn.h5")
