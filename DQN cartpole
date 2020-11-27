@@ -15,7 +15,7 @@ config = tf.compat.v1.ConfigProto(gpu_options =
 config.gpu_options.allow_growth = True
 session = tf.compat.v1.Session(config=config)
 tf.compat.v1.keras.backend.set_session(session)
-log_dir = "logs/last/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+'test128128100-128'
+log_dir = "logs/last/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+'dontcount2--3layer-128'
 train_summary_writer = tf.summary.create_file_writer(log_dir)
 
 ################
@@ -29,9 +29,9 @@ def OurModel(input_shape, action_space,layer_num):
         X = Dense(16, activation="relu", kernel_initializer='he_uniform')(X)
     if layer_num == 5:
         X = Dense(8, input_shape=input_shape, activation="tanh", kernel_initializer='he_uniform')(X)
-        X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(10, activation="relu", kernel_initializer='he_uniform')(X)
-        X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(12, activation="relu", kernel_initializer='he_uniform')(X)
+        X = Dense(10, activation="relu", kernel_initializer='he_uniform')(X)
         X = Dense(8, activation="relu", kernel_initializer='he_uniform')(X)
     # Output Layer with # of actions: 2 nodes (left, right)
     X = Dense(action_space, activation="linear", kernel_initializer='he_uniform')(X)
@@ -59,7 +59,7 @@ class DQNAgent:
         self.epsilon_decay = 0.9995
         self.batch_size = 256
         self.train_start = 1000
-        self.layer_num = 5
+        self.layer_num = 3
         self.Save_Path = 'Models'
         self.scores, self.episodes, self.average = [], [], []
 
@@ -140,6 +140,7 @@ class DQNAgent:
         return str(self.average[-1])[:5]
 
     def run(self):
+        steps_list = []
         for e in range(self.EPISODES):
             state = self.env.reset()
             state = np.reshape(state, [1, self.state_size])
@@ -167,6 +168,13 @@ class DQNAgent:
                                                                                     average))
                     with train_summary_writer.as_default():
                         tf.summary.scalar('reward', i, step=e)
+                    steps_list.append(i)
+                    runningMean = np.mean(steps_list[-100:])
+                    print(runningMean)
+                    if runningMean > 475:
+                        print("you made it!")
+                        print(runningMean)
+                        break
                 self.replay()
 
 
