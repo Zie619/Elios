@@ -1,4 +1,3 @@
-Here’s a short `README.md` you can use for your DQN course project:
 
 ```markdown
 # Deep Q-Network (DQN) Project
@@ -47,4 +46,4 @@ The trained DQN agent was able to successfully solve the environment, achieving 
 This project is licensed under the MIT License.
 ```
 
-This is a brief and professional way to describe your DQN course project. Feel free to adjust as needed!
+
